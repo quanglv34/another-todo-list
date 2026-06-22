@@ -151,6 +151,8 @@ This maps the requested feature set to **capabilities** — what the product mus
 
 **Local-first tasks + collections + list & day view + simple start/stop time tracking + quick add by date**, single device. This validates the unique value (tasks + time, offline) before investing in multi-device sync conflict resolution and the richer table/calendar views.
 
+> **Sequencing update (2026-06-22):** The first implemented MVP is **cloud-backed and online-dependent**, not local-first. We brought **C2 (Auth & account)** forward and built persistence on **Cloudflare D1 + Drizzle** with **Better Auth** anonymous-first sign-in (zero-friction start, email/password upgrade). **C1 (offline-first / local-first sync)** is intentionally **deferred** to a later phase. Anonymous auth preserves the "use it without signing up" feel, but data lives in D1, not on-device. Revisit C1 as the differentiating "spine" once the cloud MVP is validated. See the `setup-auth-and-db` change.
+
 ```
 MVP ──────────────▶ v1 ──────────────▶ v2
 local-first         + encrypted sync   + week table view

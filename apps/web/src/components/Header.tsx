@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import AuthStatus from "./AuthStatus";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
@@ -62,6 +63,7 @@ export default function Header() {
             </svg>
           </a>
 
+          <AuthStatus />
           <ThemeToggle />
         </div>
       </nav>

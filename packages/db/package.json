@@ -1,8 +1,8 @@
 {
-  "name": "@workspace/todo-list-core",
+  "name": "@workspace/database",
   "version": "0.0.0",
   "private": true,
-  "description": "Framework-agnostic todo domain logic (types + pure functions).",
+  "description": "Drizzle schema + Cloudflare D1 client factory (auth tables + todos).",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -14,7 +14,11 @@
     "test": "vp test",
     "check": "vp check"
   },
+  "dependencies": {
+    "drizzle-orm": "catalog:"
+  },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260621.1",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:"

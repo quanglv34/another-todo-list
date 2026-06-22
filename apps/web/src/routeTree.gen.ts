@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as TodosRouteImport } from "./routes/todos";
+import { Route as AuthRouteImport } from "./routes/auth";
 import { Route as AboutRouteImport } from "./routes/about";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth/$";
 
 const TodosRoute = TodosRouteImport.update({
   id: "/todos",
   path: "/todos",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthRoute = AuthRouteImport.update({
+  id: "/auth",
+  path: "/auth",
   getParentRoute: () => rootRouteImport,
 } as any);
 const AboutRoute = AboutRouteImport.update({
@@ -28,35 +35,48 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: "/api/auth/$",
+  path: "/api/auth/$",
+  getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/about": typeof AboutRoute;
+  "/auth": typeof AuthRoute;
   "/todos": typeof TodosRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/about": typeof AboutRoute;
+  "/auth": typeof AuthRoute;
   "/todos": typeof TodosRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/about": typeof AboutRoute;
+  "/auth": typeof AuthRoute;
   "/todos": typeof TodosRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/about" | "/todos";
+  fullPaths: "/" | "/about" | "/auth" | "/todos" | "/api/auth/$";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/about" | "/todos";
-  id: "__root__" | "/" | "/about" | "/todos";
+  to: "/" | "/about" | "/auth" | "/todos" | "/api/auth/$";
+  id: "__root__" | "/" | "/about" | "/auth" | "/todos" | "/api/auth/$";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   AboutRoute: typeof AboutRoute;
+  AuthRoute: typeof AuthRoute;
   TodosRoute: typeof TodosRoute;
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -66,6 +86,13 @@ declare module "@tanstack/react-router" {
       path: "/todos";
       fullPath: "/todos";
       preLoaderRoute: typeof TodosRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/auth": {
+      id: "/auth";
+      path: "/auth";
+      fullPath: "/auth";
+      preLoaderRoute: typeof AuthRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/about": {
@@ -82,13 +109,22 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/api/auth/$": {
+      id: "/api/auth/$";
+      path: "/api/auth/$";
+      fullPath: "/api/auth/$";
+      preLoaderRoute: typeof ApiAuthSplatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AuthRoute: AuthRoute,
   TodosRoute: TodosRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -10,6 +10,18 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: 4.1.9
   vite-plus: latest
+  # Auth + persistence stack. Pinned to exact versions so a freshly-published
+  # patch can't trip Vite+'s minimum-release-age guardrail (same rationale as
+  # the nanoid override below).
+  better-auth: 1.6.20
+  "@better-auth/cli": 1.4.21
+  drizzle-orm: 0.45.2
+  drizzle-kit: 0.31.10
+  # TanStack Start's SSR/Cloudflare build runs through Nitro (v3 nightly), not
+  # @cloudflare/vite-plugin — the latter can't resolve `#tanstack-start-entry`
+  # under Vite 8/rolldown. Pinned to the build the tanstack-viteplus reference
+  # repo uses. See the start-plugin-core notes.
+  nitro: npm:nitro-nightly@3.0.1-20260501-164602-aee73f19
 
 overrides:
   vite: "catalog:"
@@ -17,6 +29,17 @@ overrides:
   # Pin away from a freshly-published patch (3.3.15) that trips Vite+'s
   # minimum-release-age supply-chain guardrail. 3.3.11 satisfies all ^3 ranges.
   nanoid: 3.3.11
+  # Collapse better-call to a single version. better-auth@1.6.20 / @better-auth/core
+  # peer-require exactly 1.3.6 (which exports `kAPIErrorHeaderSymbol`), but the
+  # older @better-auth/cli@1.4.21 drags in 1.1.8, and pnpm's peer resolution was
+  # binding the app's core to that 1.1.8 variant — breaking the web build with a
+  # missing-export error. Forcing 1.3.6 removes 1.1.8 from the graph entirely.
+  better-call: 1.3.6
+  # Nitro v3 requires h3 v2; force the whole graph onto it (mirrors the
+  # tanstack-viteplus reference overrides) and a modern esbuild.
+  esbuild: ">=0.25.0"
+  h3: ">=2.0.1-rc.18"
+  h3-v2: "npm:h3@>=2.0.1-rc.18"
 
 pnpm:
   onlyBuiltDependencies:
@@ -29,3 +52,14 @@ pnpm:
     allowedVersions:
       vite: "*"
       vitest: "*"
+
+# pnpm build-script approval. Allow only what the app needs to build/run:
+# workerd (Cloudflare Workers runtime), better-sqlite3 (native), esbuild.
+# sharp and @prisma/client are unused transitive deps (this stack uses
+# Drizzle, not Prisma), so their install scripts stay disabled.
+allowBuilds:
+  "@prisma/client": false
+  better-sqlite3: true
+  esbuild: true
+  sharp: false
+  workerd: true

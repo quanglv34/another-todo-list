@@ -10,6 +10,8 @@
     "generate-routes": "node node_modules/@tanstack/router-cli/bin/tsr.cjs generate",
     "build": "vite build",
     "preview": "vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
@@ -20,13 +22,19 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "@workspace/database": "workspace:*",
+    "@workspace/todo-list-core": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
     "lucide-react": "^0.545.0",
+    "nitro": "catalog:",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.18",
-    "todo-list-core": "workspace:*"
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@better-auth/cli": "catalog:",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "^1.132.0",
@@ -36,10 +44,12 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "drizzle-kit": "catalog:",
     "jsdom": "^28.1.0",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "wrangler": "^4.103.0"
   }
 }

@@ -6,6 +6,7 @@
   "scripts": {
     "ready": "vp check && vp run -r test && vp run -r build",
     "dev": "vp run web#dev",
+    "deploy": "vp run web#deploy",
     "build": "vp run -r build",
     "test": "vp run -r test",
     "check": "vp check",
@@ -23,5 +24,6 @@
   },
   "engines": {
     "node": ">=22.18.0"
-  }
+  },
+  "packageManager": "pnpm@11.8.0"
 }

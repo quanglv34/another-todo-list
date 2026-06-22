@@ -1,0 +1,9 @@
+# Copy to .dev.vars for local development (the real file is gitignored).
+# Wrangler/Miniflare loads these as the Worker's env in `wrangler dev`.
+#
+# BETTER_AUTH_SECRET: signs sessions/tokens. Generate with:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+# In production set it with: wrangler secret put BETTER_AUTH_SECRET
+BETTER_AUTH_SECRET=replace-with-a-32-byte-random-secret
+# Base URL Better Auth uses to build callback/cookie URLs. Match your origin.
+BETTER_AUTH_URL=http://localhost:3000

@@ -1,44 +1,83 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import { Button } from "@workspace/ui";
+import { filterTodos, remainingCount, type TodoFilter } from "@workspace/todo-list-core";
+import { ensureAnonymousSession } from "#/lib/auth-client";
 import {
-  addTodo,
-  clearCompleted,
-  createTodo,
-  filterTodos,
-  remainingCount,
-  removeTodo,
-  toggleTodo,
-  type Todo,
-  type TodoFilter,
-} from "todo-list-core";
+  createTodoFn,
+  deleteTodoFn,
+  listTodos,
+  renameTodoFn,
+  toggleTodoFn,
+  type TodoDTO,
+} from "#/server/todos";
 
-export const Route = createFileRoute("/todos")({ component: TodosPage });
+export const Route = createFileRoute("/todos")({
+  loader: () => listTodos(),
+  component: TodosPage,
+});
 
 const FILTERS: TodoFilter[] = ["all", "active", "completed"];
 
 function TodosPage() {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const todos = Route.useLoaderData();
+  const router = useRouter();
+
   const [filter, setFilter] = useState<TodoFilter>("all");
   const [draft, setDraft] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState("");
+  const [busy, setBusy] = useState(false);
 
+  // `TodoDTO` is structurally a core `Todo`, so the pure helpers apply directly.
   const visible = filterTodos(todos, filter);
   const remaining = remainingCount(todos);
 
-  function handleAdd(event: React.FormEvent) {
+  async function handleAdd(event: React.FormEvent) {
     event.preventDefault();
-    if (!draft.trim()) return;
-    const todo = createTodo(draft, {
-      id: crypto.randomUUID(),
-      createdAt: Date.now(),
-    });
-    setTodos((current) => addTodo(current, todo));
-    setDraft("");
+    const title = draft.trim();
+    if (!title || busy) return;
+    setBusy(true);
+    try {
+      // Anonymous-first: create a guest account on the first todo if needed.
+      await ensureAnonymousSession();
+      await createTodoFn({ data: { title } });
+      setDraft("");
+      await router.invalidate();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleToggle(todo: TodoDTO) {
+    await toggleTodoFn({ data: { id: todo.id } });
+    await router.invalidate();
+  }
+
+  async function handleDelete(id: string) {
+    await deleteTodoFn({ data: { id } });
+    await router.invalidate();
+  }
+
+  async function handleRenameCommit(id: string) {
+    const title = editDraft.trim();
+    setEditingId(null);
+    if (!title) return;
+    await renameTodoFn({ data: { id, title } });
+    await router.invalidate();
+  }
+
+  async function handleClearCompleted() {
+    const completed = todos.filter((todo) => todo.completed);
+    if (completed.length === 0) return;
+    await Promise.all(completed.map((todo) => deleteTodoFn({ data: { id: todo.id } })));
+    await router.invalidate();
   }
 
   return (
     <main className="page-wrap px-4 pb-8 pt-14">
       <section className="island-shell rise-in rounded-[2rem] px-6 py-10 sm:px-10 sm:py-12">
-        <p className="island-kicker mb-3">Powered by todo-list-core</p>
+        <p className="island-kicker mb-3">Stored in your account</p>
         <h1 className="display-title mb-6 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-5xl">
           Todos
         </h1>
@@ -50,12 +89,9 @@ function TodosPage() {
             placeholder="What needs doing?"
             className="flex-1 rounded-full border border-[rgba(23,58,64,0.2)] bg-white/60 px-5 py-2.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[rgba(50,143,151,0.5)]"
           />
-          <button
-            type="submit"
-            className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.16)] px-5 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.26)]"
-          >
+          <Button type="submit" size="md" isDisabled={busy}>
             Add
-          </button>
+          </Button>
         </form>
 
         <ul className="m-0 list-none space-y-2 p-0">
@@ -64,17 +100,36 @@ function TodosPage() {
               <input
                 type="checkbox"
                 checked={todo.completed}
-                onChange={() => setTodos((current) => toggleTodo(current, todo.id))}
+                onChange={() => handleToggle(todo)}
                 className="h-4 w-4"
               />
-              <span
-                className={`flex-1 text-sm text-[var(--sea-ink)] ${todo.completed ? "line-through opacity-60" : ""}`}
-              >
-                {todo.title}
-              </span>
+              {editingId === todo.id ? (
+                <input
+                  autoFocus
+                  value={editDraft}
+                  onChange={(event) => setEditDraft(event.target.value)}
+                  onBlur={() => handleRenameCommit(todo.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void handleRenameCommit(todo.id);
+                    if (event.key === "Escape") setEditingId(null);
+                  }}
+                  className="flex-1 rounded-md border border-[rgba(50,143,151,0.5)] bg-white/70 px-2 py-1 text-sm text-[var(--sea-ink)] outline-none"
+                />
+              ) : (
+                <span
+                  onDoubleClick={() => {
+                    setEditingId(todo.id);
+                    setEditDraft(todo.title);
+                  }}
+                  className={`flex-1 cursor-text text-sm text-[var(--sea-ink)] ${todo.completed ? "line-through opacity-60" : ""}`}
+                  title="Double-click to rename"
+                >
+                  {todo.title}
+                </span>
+              )}
               <button
                 type="button"
-                onClick={() => setTodos((current) => removeTodo(current, todo.id))}
+                onClick={() => handleDelete(todo.id)}
                 className="text-sm text-[var(--sea-ink-soft)] transition hover:text-[var(--lagoon-deep)]"
               >
                 Remove
@@ -106,7 +161,7 @@ function TodosPage() {
           </div>
           <button
             type="button"
-            onClick={() => setTodos((current) => clearCompleted(current))}
+            onClick={handleClearCompleted}
             className="transition hover:text-[var(--lagoon-deep)]"
           >
             Clear completed
