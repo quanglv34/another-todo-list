@@ -1,6 +1,25 @@
 # TanStack Start — Project Context
 
-## Scaffold Command
+## Monorepo Layout
+
+This is a **Vite+ (vite-plus) monorepo** managed with pnpm workspaces:
+
+```
+.                        # workspace root: pnpm-workspace.yaml, root vite.config.ts (lint/fmt/staged), tsconfig.json
+├── apps/
+│   └── web/             # the TanStack Start app (package name: "web")
+└── packages/
+    └── todo-list-core/  # framework-agnostic todo domain logic (package name: "todo-list-core")
+```
+
+- The workspace **catalog** (vite, vitest, vite-plus, typescript, @types/node) lives in `pnpm-workspace.yaml`.
+- `apps/web` consumes the core package via the workspace dependency `"todo-list-core": "workspace:*"`.
+- `packages/todo-list-core` is an internal package: its `exports` point at `./src/index.ts`, so the
+  Vite app compiles it directly (no prebuild step needed for dev or build).
+
+Scaffolded with Vite+: `vp create vite:monorepo` (root) and `vp create vite:library` (the core package).
+
+## Scaffold Command (original app)
 
 ```
 npx @tanstack/cli@latest create my-tanstack-app --agent
@@ -21,13 +40,21 @@ Run in a scratch directory (`/tmp/my-tanstack-app`), then merged into this repo.
 
 ## Development
 
+Run from the **workspace root**:
+
 ```bash
-pnpm install
-pnpm dev          # http://localhost:3000
-pnpm build        # production build
-pnpm preview      # preview production build
-pnpm test         # run vitest
-pnpm generate-routes  # re-generate routeTree.gen.ts (normally auto)
+vp install                  # install all workspace deps (delegates to pnpm)
+pnpm dev                    # web app at http://localhost:3000 (→ vp run web#dev)
+pnpm build                  # build every package (vp run -r build)
+pnpm test                   # test every package (vp run -r test)
+vp check                    # workspace-wide format + lint + type-check
+```
+
+Per-package commands (run from `apps/web` or `packages/todo-list-core`):
+
+```bash
+vp dev / vp build / vp preview / vp test / vp check
+pnpm --filter web generate-routes   # re-generate routeTree.gen.ts (normally auto)
 ```
 
 ## TanStack Intent
@@ -47,18 +74,22 @@ for the complete skill list).
 
 ## Key Architecture
 
-- **Document shell**: `src/routes/__root.tsx` — renders the full `<html>` document
+All app paths below are under `apps/web/`:
+
+- **Document shell**: `apps/web/src/routes/__root.tsx` — renders the full `<html>` document
   via `shellComponent: RootDocument`. No `index.html` needed.
-- **Router factory**: `src/router.tsx` → `getRouter()` — consumed by the TanStack
+- **Router factory**: `apps/web/src/router.tsx` → `getRouter()` — consumed by the TanStack
   Start Vite plugin to wire client and server entry points automatically.
-- **Route tree**: `src/routeTree.gen.ts` — auto-generated; do NOT edit manually.
+- **Route tree**: `apps/web/src/routeTree.gen.ts` — auto-generated; do NOT edit manually.
   Excluded from VSCode search/watcher via `.vscode/settings.json`.
-- **Styles**: `src/styles.css` — Tailwind v4 entry with CSS custom property tokens.
-- **Path alias**: `#/*` → `./src/*` (configured in `package.json` imports and `tsconfig.json`).
+- **Styles**: `apps/web/src/styles.css` — Tailwind v4 entry with CSS custom property tokens.
+- **Path alias**: `#/*` → `./src/*` (configured in `apps/web/package.json` imports and `apps/web/tsconfig.json`).
+- **Core logic**: `packages/todo-list-core` — pure `Todo` types + functions, imported as `todo-list-core`
+  (see `apps/web/src/routes/todos.tsx` for usage).
 
 ## Adding Routes
 
-Drop a `.tsx` file in `src/routes/`. TanStack Router's Vite plugin regenerates
+Drop a `.tsx` file in `apps/web/src/routes/`. TanStack Router's Vite plugin regenerates
 `routeTree.gen.ts` automatically on save during `pnpm dev`.
 
 ## Environment Variables
