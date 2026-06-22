@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "vp pack",
-    "test": "vp test",
+    "test": "vp test --passWithNoTests",
     "check": "vp check"
   },
   "dependencies": {
