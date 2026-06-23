@@ -2,11 +2,11 @@
   "name": "@workspace/database",
   "version": "0.0.0",
   "private": true,
-  "description": "Drizzle schema + Cloudflare D1 client factory (auth tables + todos).",
+  "description": "Drizzle schema + Turso/libSQL client factory (auth tables + todos).",
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -15,10 +15,10 @@
     "check": "vp check"
   },
   "dependencies": {
+    "@libsql/client": "^0.15.0",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260621.1",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:"

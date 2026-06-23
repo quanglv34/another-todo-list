@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "1.42.1",
+    "@libsql/client": "^0.15.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",

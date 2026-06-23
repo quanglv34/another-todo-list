@@ -1,13 +1,18 @@
 import { defineConfig } from "drizzle-kit";
 
 /**
- * Migration generation only. We generate versioned SQL from the Drizzle schema
- * here and apply it with `wrangler d1 migrations apply` (local Miniflare and
- * production), so no runtime D1 credentials are needed in this config. `out`
- * matches `migrations_dir` in wrangler.jsonc.
+ * Drizzle Kit config for Turso / libSQL.
+ *
+ * Uses environment variables for the Turso connection so migrations can be
+ * applied against both local (`file:` URL) and remote databases without
+ * changing this file.
  */
 export default defineConfig({
-  dialect: "sqlite",
+  dialect: "turso",
   schema: "../../packages/db/src/schema.ts",
   out: "./drizzle",
+  dbCredentials: {
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  },
 });

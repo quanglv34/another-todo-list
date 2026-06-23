@@ -1,9 +1,18 @@
 # Copy to .dev.vars for local development (the real file is gitignored).
-# Wrangler/Miniflare loads these as the Worker's env in `wrangler dev`.
+# Wrangler/Miniflare loads these as the Worker's env in `vite dev`.
 #
-# BETTER_AUTH_SECRET: signs sessions/tokens. Generate with:
+# The defaults in wrangler.jsonc use `file:./local.db` (Miniflare local SQLite),
+# so you only need .dev.vars if you want to connect to a real Turso database.
+
+# Turso database URL (optional - defaults to local SQLite in wrangler.jsonc)
+# TURSO_DATABASE_URL=libsql://your-db-name-your-org.turso.io
+
+# Turso auth token (optional - needed if using real Turso database)
+# TURSO_AUTH_TOKEN=your-turso-auth-token
+
+# Better Auth secret - signs sessions/tokens. Generate with:
 #   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
-# In production set it with: wrangler secret put BETTER_AUTH_SECRET
 BETTER_AUTH_SECRET=replace-with-a-32-byte-random-secret
-# Base URL Better Auth uses to build callback/cookie URLs. Match your origin.
+
+# Base URL Better Auth uses to build callback/cookie URLs
 BETTER_AUTH_URL=http://localhost:3000

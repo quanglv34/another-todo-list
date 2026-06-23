@@ -1,21 +1,26 @@
 /**
- * Cloudflare D1 client factory.
+ * Turso / libSQL client factory.
  *
- * The D1 binding only exists on the per-request `env`, never at module scope,
- * so we never construct a Drizzle instance at import time. Call `createDb(env)`
- * once per request and pass the result down — creating a second wrapper around
- * the same binding risks SQLite single-writer lock contention locally.
+ * Connection credentials are passed per-request through the Worker `env` object
+ * (never at module scope) so the same `createDb(env)` call-site used with D1
+ * keeps working — only the shape of `DbEnv` changed.
  */
-import { drizzle } from "drizzle-orm/d1";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema.ts";
 
-/** Minimal shape of the Worker `env` this package needs: just the D1 binding. */
+/** Environment variables required to connect to Turso. */
 export interface DbEnv {
-  DB: D1Database;
+  TURSO_DATABASE_URL: string;
+  TURSO_AUTH_TOKEN: string;
 }
 
 export function createDb(env: DbEnv) {
-  return drizzle(env.DB, { schema });
+  const client = createClient({
+    url: env.TURSO_DATABASE_URL,
+    authToken: env.TURSO_AUTH_TOKEN,
+  });
+  return drizzle(client, { schema });
 }
 
 export type Database = ReturnType<typeof createDb>;

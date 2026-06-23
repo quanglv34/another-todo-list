@@ -5,7 +5,7 @@ import { env } from "cloudflare:workers";
 import { and, eq, sql } from "drizzle-orm";
 import { getSession, requireUser } from "#/server/session";
 
-/** Serializable todo sent to the client (D1 stores createdAt as a Date). */
+/** Serializable todo sent to the client. */
 export interface TodoDTO {
   id: string;
   title: string;

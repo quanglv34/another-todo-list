@@ -10,7 +10,7 @@ export type SessionUser = NonNullable<SessionPayload>["user"];
 /**
  * Read the current session from the request cookies. Constructs the auth
  * instance from the request-scoped `env` inside the handler (never at module
- * scope — the D1 binding only exists per request).
+ * scope — Turso credentials only exist per request).
  */
 export const getSession = createServerFn({ method: "GET" }).handler(
   async (): Promise<SessionPayload> => {

@@ -7,11 +7,12 @@ import { eq } from "drizzle-orm";
 
 /**
  * The slice of the Worker `env` Better Auth needs. Resolved per request from
- * `cloudflare:workers` — never at module scope (the D1 binding does not exist
- * until a request is in flight). See `getAuth()`.
+ * `cloudflare:workers` — never at module scope (credentials don't exist until a
+ * request is in flight). See `getAuth()`.
  */
 export interface AuthEnv {
-  DB: D1Database;
+  TURSO_DATABASE_URL: string;
+  TURSO_AUTH_TOKEN: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
 }
@@ -19,7 +20,7 @@ export interface AuthEnv {
 /**
  * Build a Better Auth instance from a request-scoped `env`.
  *
- * - Drizzle adapter over the same D1 client (`createDb`) the app uses, so auth
+ * - Drizzle adapter over the same Turso client (`createDb`) the app uses, so auth
  *   tables and app tables share one ORM and migration workflow.
  * - `anonymous()` gives every visitor a guest account on first interaction.
  * - `emailAndPassword` enables registration / sign-in and the anon→registered
