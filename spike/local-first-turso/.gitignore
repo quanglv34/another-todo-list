@@ -1,8 +1,0 @@
-# Throwaway spike — never commit run artifacts, local sync DBs, or secrets.
-node_modules/
-.env
-*.db
-*.db-*
-.vite/
-dist/
-FINDINGS.local.md

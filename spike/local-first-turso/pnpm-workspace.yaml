@@ -1,5 +1,0 @@
-# Standalone spike root (NOT part of the app's pnpm workspace — no `packages:`
-# globs, so it manages only its own deps). Approve esbuild's install script so
-# `pnpm install` exits 0 (pnpm 11 fails the pre-script deps check otherwise).
-allowBuilds:
-  esbuild: true
