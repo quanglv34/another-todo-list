@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+      - run: vp install
+
+      - name: Lint, format, and typecheck
+        run: vp check
+
+      - name: Test
+        run: vp run web#test
+
+      - name: Build
+        run: vp run web#build
+
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd apps/web
+          echo "${{ secrets.TURSO_DATABASE_URL_PROD }}" | npx wrangler secret put TURSO_DATABASE_URL --env production
+          echo "${{ secrets.TURSO_AUTH_TOKEN_PROD }}" | npx wrangler secret put TURSO_AUTH_TOKEN --env production
+          echo "${{ secrets.BETTER_AUTH_SECRET_PROD }}" | npx wrangler secret put BETTER_AUTH_SECRET --env production
+          npx wrangler deploy --env production
+
+      - name: Deploy to development
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          cd apps/web
+          echo "${{ secrets.TURSO_DATABASE_URL_DEV }}" | npx wrangler secret put TURSO_DATABASE_URL --env development
+          echo "${{ secrets.TURSO_AUTH_TOKEN_DEV }}" | npx wrangler secret put TURSO_AUTH_TOKEN --env development
+          echo "${{ secrets.BETTER_AUTH_SECRET_DEV }}" | npx wrangler secret put BETTER_AUTH_SECRET --env development
+          npx wrangler deploy --env development

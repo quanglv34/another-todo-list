@@ -1,0 +1,22 @@
+{
+  "name": "spike-local-first-turso",
+  "version": "0.0.0",
+  "private": true,
+  "description": "THROWAWAY spike PoC for openspec change `spike-local-first-turso-sync`. Isolated from the pnpm workspace (lives in spike/, outside the apps/* and packages/* globs) per design Decision 5. NOT a maintained part of the app — delete/archive once FINDINGS.md records the go/no-go.",
+  "type": "module",
+  "scripts": {
+    "browser": "vite",
+    "token-refresh": "node src/token-refresh.mjs",
+    "lww": "node src/lww.mjs",
+    "plan-limits": "node src/plan-limits.mjs",
+    "lifecycle": "bash src/lifecycle.sh"
+  },
+  "dependencies": {
+    "@tursodatabase/sync": "0.6.1",
+    "@tursodatabase/sync-wasm": "0.6.1"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "comment_turso_cli": "The Turso CLI is NOT an npm dependency — install it on the host per README (`brew install tursodatabase/tap/turso` or the curl installer). It is spike-local host tooling, never added to apps/web."
+}
